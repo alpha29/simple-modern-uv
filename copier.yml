@@ -2,15 +2,15 @@
 
 _min_copier_version: "9.4.0"
 _subdirectory: template
-_message_after_copy: | 
+_message_after_copy: |
     Your package template has been copied!
 
     Remember to look for any unfilled _changeme_ strings and confirm the license!
     By default this template uses MIT license.
-    See `license` in pyproject.yaml and update the LICENSE file. 
+    See `license` in pyproject.yaml and update the LICENSE file.
 
     Next steps:
-    
+
     cd PROJECT
     git init
     # Make license or other initial adjustments if needed.
@@ -24,12 +24,12 @@ _message_after_copy: |
 package_name:
     type: str
     help: What is the package name? (This will be the GitHub repo and PyPI package name, so use CamelCase, dash-case, or snake_case. This is the only required field.)
-    default: _changeme_
+    default: cactus
 
 package_module:
     type: str
     help: Package module name? (This is the Python module, so use snake_case. Or press enter to fill in later.)
-    default: _changeme_
+    default: cactus
 
 package_description:
     type: str
@@ -39,14 +39,14 @@ package_description:
 package_author_name:
     type: str
     help: Package author name? (Press enter to fill in later.)
-    default: _changeme_
+    default: C.J. Brown
 
 package_author_email:
     type: str
     help: Package author email? (Press enter to fill in later.)
-    default: _changeme_
+    default: cbrown@alpha29.com
 
 package_github_org:
     type: str
     help: Package GitHub org or username? (Press enter to fill in later.)
-    default: _changeme_
+    default: alpha29
