@@ -1,0 +1,27 @@
+import typer
+
+from {{package_module}} import __version__
+from {{package_module}}.cmd.nb import app as nb_app
+#from {{package_module}}.cmd.db import app as db_app
+
+
+# typer autocompletion does weird crap to your shell, so turn it off
+# also let's just fix no_args finally
+app = typer.Typer(add_completion=False, no_args_is_help=True)
+app.add_typer(
+    nb_app, name="nb", help="Manage Jupyter server and notebooks."
+)
+# app.add_typer(
+#    db_app, name="db", help="Manage Postgres DB."
+#)
+
+@app.command()
+def version():
+    """
+    Show the version and exit.
+    """
+    typer.echo(f"{{package_name}} {__version__}")
+
+
+def main():
+    app()
