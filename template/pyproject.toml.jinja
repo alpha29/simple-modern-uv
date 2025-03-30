@@ -20,7 +20,7 @@ dependencies = [
     "ipython>=9.0.1",
     "jupyter>=1.1.1",
     "loguru>=0.7.3",
-    "polars>=1.24.0",
+    "polars[all,pandas]>=1.24.0",
     "python-on-whales>=0.75.1",
     "typeguard>=4.4.2",
     "typer>=0.15.2",
@@ -117,12 +117,49 @@ disable_error_code = [
 python_files = ["*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-testpaths = [
-    "src",
-    "tests",
-]
 norecursedirs = []
-filterwarnings = []
+filterwarnings = [
+    "ignore::DeprecationWarning"
+]
+addopts =[
+    # do not capture any output---necessary for interactive breakpoints
+    "-s",
+
+    # report any tests that are skipped, xfailed, or xpassed
+    "-rsxX",
+
+    # report local variables with every stack trace
+    "-l",
+
+    # output verbosity
+    # show individual test names
+    "-vv",
+
+    # calculate test coverage for the {{package_module}} module
+    "--cov={{package_module}}",
+
+    # add terminal coverage report
+    "--cov-report=term-missing",
+
+    # add html coverage report generation
+    "--cov-report=html",
+
+    # output short traceback
+    "--tb=short",
+
+    # exclude a few things from coverage
+    # hate to pull in yet another config file, but this seems to be the only way to do it
+    "--cov-config=.coveragerc",
+]
+
+testpaths =[
+    "{package_module}/",
+    "tests/",
+]
+
+# ok wait, do I not actually need a separate .coveragerc anymore?  big if true ig
+[tool.coverage.run]
+omit = ["*/migrations/*", "*/legacy_code/*", "*/third_party/*"]
 
 [[tool.uv.index]]
 name = "a29-pypi"

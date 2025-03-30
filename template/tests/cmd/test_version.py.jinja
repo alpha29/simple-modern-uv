@@ -1,0 +1,17 @@
+from typer.testing import CliRunner
+
+from {{ package_module }}.cmd.root import app
+
+runner = CliRunner()
+
+EXPECTED_VERSION = "0.1.0"
+
+
+def test_version():
+    # '{{ package_module }} version' isn't valid as long as version is the only command
+    # so, uncomment this whenever we add a second command
+    # result = runner.invoke(app, ["version"])
+    result = runner.invoke(app)
+    assert result.exit_code == 0
+    assert f"{{ package_module }} {EXPECTED_VERSION}" in result.stdout
+    assert result.stderr_bytes is None

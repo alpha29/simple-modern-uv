@@ -17,7 +17,7 @@ settings = load_settings()
 {{package_module|upper}}_HOME = os.environ["{{package_module|upper}}_HOME"]
 NB_DIR = Path({{package_module|upper}}_HOME) / "notebooks"
 NB_PORT = settings.notebook_port
-app = typer.Typer()
+app = typer.Typer(add_completion=False, no_args_is_help=True)
 
 
 @app.command()

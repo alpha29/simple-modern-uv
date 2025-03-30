@@ -1,0 +1,12 @@
+import subprocess
+
+EXPECTED_VERSION = "0.1.0"
+
+def test_entrypoint():
+    """
+    This *looks* superfluous to test_version, but test_version bypasses the uv-created entrypoint.
+    (...Pretty sure, anyway.)
+    """
+    cmd = "{{package_module}}".split(" ")
+    result = subprocess.check_output(cmd).decode().strip()
+    assert result == f"{{package_module}} {EXPECTED_VERSION}"
