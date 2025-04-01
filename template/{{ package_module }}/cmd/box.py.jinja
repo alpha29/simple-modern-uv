@@ -1,7 +1,8 @@
 import typer
 from python_on_whales import DockerClient
+from {{package_module}} import MODULE_ROOT
 
-DOCKER_COMPOSE_FILE = "docker/box.yml"
+DOCKER_COMPOSE_FILE = MODULE_ROOT / "docker/box.yml"
 app = typer.Typer(add_completion=False, no_args_is_help=True)
 
 

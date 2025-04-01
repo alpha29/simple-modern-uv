@@ -1,0 +1,24 @@
+name: {{package_module}}-box
+services:
+  {{package_module}}-box:
+    image: "geerlingguy/docker-ubuntu2404-ansible:latest"
+    container_name: {{package_module}}-box
+    ports:
+      - "8200:8200"
+    volumes:
+      # host_directory:docker_directory
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+      #- "../:/root/uv-whaler"
+    privileged: true
+    hostname: "{{package_module}}-box"
+    #command: tail -f /dev/null
+    command: /lib/systemd/systemd
+    working_dir: /root/
+    cgroup: host
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          count: 1
+    #          capabilities: [gpu]

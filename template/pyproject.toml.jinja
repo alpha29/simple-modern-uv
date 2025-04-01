@@ -21,6 +21,7 @@ dependencies = [
     "jupyter>=1.1.1",
     "loguru>=0.7.3",
     "polars[all,pandas]>=1.24.0",
+    "prettytable>=3.16.0",
     "python-on-whales>=0.75.1",
     "typeguard>=4.4.2",
     "typer>=0.15.2",
@@ -54,6 +55,11 @@ source = "uv-dynamic-versioning"
 # Note JSON schemas don't seem to be right for tool.hatch.version.source so
 # this may cause false warnings in IDEs.
 # https://github.com/ninoseki/uv-dynamic-versioning/issues/21
+
+[tool.hatch.build.targets.my-package]
+#package = "my_package"
+#includes = ["src/my_package"]
+package-data = ["{{package_module}}/docker/*.*"]
 
 [tool.uv-dynamic-versioning]
 vcs = "git"
@@ -99,6 +105,8 @@ ignore = [
     "Q001", # https://docs.astral.sh/ruff/rules/bad-quotes-multiline-string/
     "Q002", # https://docs.astral.sh/ruff/rules/bad-quotes-docstring/
     "Q003", # https://docs.astral.sh/ruff/rules/avoidable-escaped-quote/
+    "UP006", # https://docs.astral.sh/ruff/rules/non-pep585-annotation/
+    "UP007", # https://docs.astral.sh/ruff/rules/non-pep604-annotation-union/
     "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/
     "COM819", # https://docs.astral.sh/ruff/rules/prohibited-trailing-comma/
     "ISC002", # https://docs.astral.sh/ruff/rules/multi-line-implicit-string-concatenation/
