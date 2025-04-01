@@ -4,6 +4,9 @@ OUTPUT_APP = cactus-jack
 all:
 	echo "hi there, do something else"
 
+install:
+        uv sync --all-extras --dev
+
 clean:
 	rm -rf $(OUTPUT_DIR)
 
