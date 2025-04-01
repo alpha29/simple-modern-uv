@@ -1,11 +1,11 @@
 OUTPUT_DIR = out
-OUTPUT_APP = cactus-jack
+OUTPUT_APP = chempad
 
 all:
 	echo "hi there, do something else"
 
 install:
-        uv sync --all-extras --dev
+	uv sync --all-extras --dev
 
 clean:
 	rm -rf $(OUTPUT_DIR)
