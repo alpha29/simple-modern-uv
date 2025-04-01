@@ -1,0 +1,89 @@
+import typer
+from python_on_whales import DockerClient
+
+DOCKER_COMPOSE_FILE = "docker/box.yml"
+app = typer.Typer(add_completion=False, no_args_is_help=True)
+
+
+def get_service_name(docker_compose_file) -> str:
+    dc = DockerClient(compose_files=[docker_compose_file])
+    services_list = [key for key in dc.compose.config().services.keys()]
+    assert (
+        len(services_list) == 1
+    ), f"Expected exactly one service in the compose file, but found {len(services_list)}: {services_list}"
+    return services_list[0]
+
+
+def get_container_name(docker_compose_file) -> str:
+    service_name = get_service_name(docker_compose_file)
+    dc = DockerClient(compose_files=[docker_compose_file])
+    return dc.compose.config().services[service_name].container_name
+
+
+@app.command()
+def up(docker_compose_file: str = DOCKER_COMPOSE_FILE):
+    """
+    Start docker-compose.
+    """
+    dc = DockerClient(compose_files=[docker_compose_file])
+    service_name = get_service_name(docker_compose_file)
+    dc.compose.up(detach=True, services=[service_name])
+
+
+@app.command()
+def status(docker_compose_file: str = DOCKER_COMPOSE_FILE):
+    """
+    Check status of docker instance.
+    """
+    dc = DockerClient(compose_files=[docker_compose_file])
+    service_name = get_service_name(docker_compose_file)
+    results = dc.compose.ps(services=[service_name], all=True)
+    from prettytable import PrettyTable
+
+    status_table = PrettyTable(
+        [
+            "id",
+            "name",
+            "status",
+            "pid",
+            "created",
+        ]
+    )
+    for i in results:
+        status_table.add_row(
+            [
+                i.id.split(":")[-1][0:12],
+                i.name,
+                i.state.status,
+                i.state.pid,
+                i.created,
+            ]
+        )
+    typer.echo(status_table)
+
+
+@app.command()
+def login(docker_compose_file: str = DOCKER_COMPOSE_FILE):
+    """
+    Login to the docker instance.
+    """
+    # cmd = "docker exec -it graph-rag-neo4j /bin/bash".split(" ")
+    # subprocess.run(cmd, check=False)
+    dc = DockerClient(compose_files=[docker_compose_file])
+    service_name = get_service_name(docker_compose_file)
+    dc.compose.execute(
+        service=service_name, command=["/bin/bash"], tty=True, detach=False
+    )
+
+
+@app.command()
+def down(docker_compose_file: str = DOCKER_COMPOSE_FILE):
+    """
+    Shut down docker-compose instance.
+    """
+    # cmd = f"docker compose -f {DOCKER_COMPOSE_FILE} down".split(" ")
+    # subprocess.run(cmd, check=True)
+    dc = DockerClient(compose_files=[docker_compose_file])
+    service_name = get_service_name(docker_compose_file)
+    # dc.compose.up(detach=True, services=[service_name])
+    dc.compose.down(quiet=False)

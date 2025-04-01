@@ -4,14 +4,16 @@ from {{ package_module }}.cmd.root import app
 
 runner = CliRunner()
 
-EXPECTED_VERSION = "0.1.0"
+# this will need tweaking when we have a real version, but should be ok when the project is initially generated
+EXPECTED_VERSION = "0.0.1.dev1"
 
 
 def test_version():
-    # '{{ package_module }} version' isn't valid as long as version is the only command
+    # '{{ package_name }} version' isn't valid as long as version is the only command
     # so, uncomment this whenever we add a second command
-    # result = runner.invoke(app, ["version"])
-    result = runner.invoke(app)
+    result = runner.invoke(app, ["version"])
+    # result = runner.invoke(app)
     assert result.exit_code == 0
-    assert f"{{ package_module }} {EXPECTED_VERSION}" in result.stdout
+    #assert f"{{ package_name }} {EXPECTED_VERSION}" in result.stdout
+    assert result.stdout.startswith(f"{{ package_name }} {EXPECTED_VERSION}")
     assert result.stderr_bytes is None

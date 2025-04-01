@@ -1,0 +1,17 @@
+from {{package_module}}.settings import load_settings
+
+
+def test_settings():
+    print("Loading settings...")
+    settings = load_settings()
+    print(settings.to_dict())  # Print all settings
+    assert settings.LOG_LEVEL == "INFO"
+    assert settings.LOG_TO_FILE is True
+    assert settings.LOG_FILE == "./log/{{package_module}}.log"
+    assert settings.{{package_module | upper}}_HOME is not None
+    assert settings.{{package_module | upper}}_OPTIONS is not None
+    assert settings.{{package_module | upper}}_HOME.exists()
+    assert settings.{{package_module | upper}}_OPTIONS.exists()
+    assert settings.{{package_module | upper}}_HOME.is_dir()
+    assert settings.{{package_module | upper}}_OPTIONS.is_file()
+    assert settings.NOTEBOOK_PORT == 8888

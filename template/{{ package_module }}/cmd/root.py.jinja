@@ -2,7 +2,7 @@ import typer
 
 from {{package_module}} import __version__
 from {{package_module}}.cmd.nb import app as nb_app
-#from {{package_module}}.cmd.db import app as db_app
+from {{package_module}}.cmd.box import app as box_app
 
 
 # typer autocompletion does weird crap to your shell, so turn it off
@@ -11,9 +11,9 @@ app = typer.Typer(add_completion=False, no_args_is_help=True)
 app.add_typer(
     nb_app, name="nb", help="Manage Jupyter server and notebooks."
 )
-# app.add_typer(
-#    db_app, name="db", help="Manage Postgres DB."
-#)
+app.add_typer(
+    box_app, name="box", help="Manage Docker box."
+)
 
 @app.command()
 def version():

@@ -22,6 +22,9 @@ upgrade:
 build:
 	uv build
 
+publish:
+	uv publish --index a29-pypi
+
 clean:
 	-rm -rf dist/
 	-rm -rf *.egg-info/

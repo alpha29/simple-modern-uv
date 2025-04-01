@@ -1,5 +1,7 @@
+from typing import Dict, Tuple
 from {{package_module}}.logger import logger
 import polars as pl
+from typeguard import typechecked
 
 def print_info(df: pl.DataFrame, show_columns: bool = True, show_unique: bool = False):
     """

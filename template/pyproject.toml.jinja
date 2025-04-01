@@ -29,6 +29,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
     "ruff>=0.11.0",
     "mypy>=1.15.0",
     "codespell>=2.4.1",
@@ -153,7 +154,7 @@ addopts =[
 ]
 
 testpaths =[
-    "{package_module}/",
+    "{{package_module}}/",
     "tests/",
 ]
 

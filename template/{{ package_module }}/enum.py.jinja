@@ -1,0 +1,41 @@
+from enum import StrEnum
+from typing import Dict, List
+
+import numpy as np
+
+
+class BaseStrEnum(StrEnum):
+
+    @classmethod
+    def as_list(cls) -> List[str]:
+        return [e.value for e in cls]
+
+    @classmethod
+    def as_dict(cls) -> Dict[str, str]:
+        return {i.name: i.value for i in cls}
+
+    @classmethod
+    def as_dict_onehot(cls) -> Dict[str, np.ndarray]:
+        """
+        this is sort of stupid, should have just zipped off np.eye(len(cls.as_list(), dtype=np.float32)...
+        """
+        one_hot_2d = np.zeros(
+            [len(cls.as_list()), len(cls.as_list())], dtype=np.float32
+        )
+        np.fill_diagonal(one_hot_2d, 1.0)
+        # despite the 'k', we're actually zipping in the StrEnum values (which is as it should be)
+        one_hot_dict = {
+            k: one_hot_1d for k, one_hot_1d in zip(cls.as_list(), one_hot_2d)
+        }
+        return one_hot_dict
+
+    @classmethod
+    def onehot(cls, value: str) -> np.ndarray:
+        """
+        Get the one-hot entry for the specified value, or dump to the last in the list if not found
+        """
+        one_hot_dict = cls.as_dict_onehot()
+        if value in cls.as_list():
+            return one_hot_dict[value]
+        else:
+            return one_hot_dict[cls.as_list()[-1]]
