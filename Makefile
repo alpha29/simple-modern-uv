@@ -1,5 +1,5 @@
 OUTPUT_DIR = out
-OUTPUT_APP = cactus-jack
+OUTPUT_APP = try-prefect
 
 all:
 	echo "hi there, do something else"
@@ -11,6 +11,7 @@ clean:
 	rm -rf $(OUTPUT_DIR)
 
 copy:
+	mkdir -p $(OUTPUT_DIR)
 	copier copy . $(OUTPUT_DIR)
 
 promote:
