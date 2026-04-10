@@ -30,12 +30,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.5",
+    "pytest>=9.0.3",
     "pytest-cov>=6.0.0",
-    "ruff>=0.11.0",
+    "ruff>=0.15.10",
     "mypy>=1.15.0",
     "codespell>=2.4.1",
     "rich>=13.9.4",
+    "black>=26.3.1",
+    "isort>=8.0.1",
 ]
 
 [project.scripts]
@@ -124,10 +126,10 @@ disable_error_code = [
 # skip = "foo.py,bar.py"
 
 [tool.pytest.ini_options]
-python_files = ["*.py"]
+python_files = ["test*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-norecursedirs = []
+norecursedirs = [".git", ".venv", "__pycache__", "htmlcov", "log", "devtools", "data", ".ruff_cache"]
 filterwarnings = [
     "ignore::DeprecationWarning"
 ]
@@ -163,7 +165,6 @@ addopts =[
 ]
 
 testpaths =[
-    "{{package_module}}/",
     "tests/",
 ]
 

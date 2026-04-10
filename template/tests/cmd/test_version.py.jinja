@@ -5,7 +5,7 @@ from {{ package_module }}.cmd.root import app
 runner = CliRunner()
 
 # this will need tweaking when we have a real version, but should be ok when the project is initially generated
-EXPECTED_VERSION = "0.0.1.dev1"
+EXPECTED_VERSION = "0.0.1.dev"
 
 
 def test_version():
@@ -16,4 +16,4 @@ def test_version():
     assert result.exit_code == 0
     #assert f"{{ package_name }} {EXPECTED_VERSION}" in result.stdout
     assert result.stdout.startswith(f"{{ package_name }} {EXPECTED_VERSION}")
-    assert result.stderr_bytes is None
+    assert result.stderr_bytes == b''

@@ -39,3 +39,8 @@ class BaseStrEnum(StrEnum):
             return one_hot_dict[value]
         else:
             return one_hot_dict[cls.as_list()[-1]]
+
+
+class RDBMS(BaseStrEnum):
+    POSTGRESQL = "POSTGRESQL"
+    SQLITE = "SQLITE"

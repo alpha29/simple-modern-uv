@@ -1,0 +1,28 @@
+[logging]
+log_level = "INFO"
+log_to_file = true
+log_file = "./log/{{package_module}}.log"
+
+[jupyter]
+notebook_port = 8888
+
+[master]
+host = "localhost"
+port = 6870
+
+[agent]
+port = 68701
+
+[database]
+# valid values:  POSTGRESQL, SQLITE
+rdbms = "SQLITE"
+
+[database.postgresql]
+username = "{{package_module}}"
+password = "noooooo"
+host = "localhost"
+port = 5432
+db_name = "{{package_module}}"
+
+[database.sqlite]
+filepath = "{{package_module}}.db"

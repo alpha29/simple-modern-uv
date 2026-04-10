@@ -3,11 +3,10 @@ import sys
 
 from loguru import logger as loguru_logger
 
-from {{package_module}}.settings import load_settings
+from {{package_module}}.settings import settings
 
-settings = load_settings()
-LOGURU_LOG_LEVEL = settings.log_level
-LOGURU_LOG_TO_FILE = settings.log_to_file
+LOGURU_LOG_LEVEL = settings.logging.log_level
+LOGURU_LOG_TO_FILE = settings.logging.log_to_file
 
 __all__ = ["logger"]
 
@@ -36,7 +35,7 @@ logger = loguru_logger
 
 if LOGURU_LOG_TO_FILE:
     logger.add(
-        settings.log_file,
+        settings.logging.log_file,
         level=LOGURU_LOG_LEVEL,
         rotation="1 day",
         compression="zip",

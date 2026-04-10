@@ -10,13 +10,11 @@ import nbformat as nbf
 import typer
 from typing_extensions import Annotated
 
-from {{package_module}}.settings import load_settings
-
-settings = load_settings()
+from {{package_module}}.settings import settings
 
 {{package_module|upper}}_HOME = os.environ["{{package_module|upper}}_HOME"]
 NB_DIR = Path({{package_module|upper}}_HOME) / "notebooks"
-NB_PORT = settings.notebook_port
+NB_PORT = settings.jupyter.notebook_port
 app = typer.Typer(add_completion=False, no_args_is_help=True)
 
 

@@ -1,8 +1,89 @@
 import os
 from pathlib import Path
+
 from dynaconf import Dynaconf, LazySettings
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, PostgresDsn, SecretStr
 from typeguard import typechecked
+
+from {{ package_module }}.enums import RDBMS
+
+
+PORT_MIN: int = 1024
+PORT_MAX: int = 491510
+
+
+class SettingsSchemaLogging(BaseModel):
+    log_level: str = Field(default="INFO")
+    log_to_file: bool = Field(default=False)
+    log_file: str = Field(default="./log/{{package_module}}.log")
+
+
+class SettingsSchemaJupyter(BaseModel):
+    notebook_port: int = Field(..., ge=PORT_MIN, le=PORT_MAX)
+
+
+class SettingsSchemaDatabasePostgresql(BaseModel):
+    username: str = Field(default="")
+    password: SecretStr = Field(default="")
+    host: str = Field(default="localhost")
+    port: int = Field(..., ge=PORT_MIN, le=PORT_MAX)
+    db_name: str = Field(default="{{package_module}}")
+    url: PostgresDsn = Field(default="")
+
+    def set_url(self):
+        # self.url = f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.db_name}"
+        self.url = PostgresDsn.build(
+            scheme="postgresql",
+            username=self.username,
+            password=self.password.get_secret_value(),
+            host=self.host,
+            port=self.port,
+            path=self.db_name,
+        )
+
+    def model_post_init(self, context):
+        super().model_post_init(context)
+        self.set_url()
+
+
+class SettingsSchemaDatabaseSqlite(BaseModel):
+    filepath: Path = Field(default="./{{package_module}}.db")
+    url: str = Field(default="")
+
+    def set_url(self):
+        self.url = f"sqlite:///{self.filepath}"
+
+    def model_post_init(self, context):
+        super().model_post_init(context)
+        self.set_url()
+
+
+class SettingsSchemaDatabase(BaseModel):
+    rdbms: RDBMS
+    sqlite: SettingsSchemaDatabaseSqlite | None
+    postgresql: SettingsSchemaDatabasePostgresql | None
+    url: str = Field(default="")
+
+    def set_url(self):
+        match self.rdbms:
+            case RDBMS.SQLITE:
+                self.url = self.sqlite.url
+            case RDBMS.POSTGRESQL:
+                self.url = self.postgresql.url
+
+    def model_post_init(self, context):
+        super().model_post_init(context)
+        self.set_url()
+
+
+class SettingsSchemaMaster(BaseModel):
+    host: str = Field(default="localhost")
+    port: int = Field(..., ge=PORT_MIN, le=PORT_MAX)
+
+
+class SettingsSchemaAgent(BaseModel):
+    port: int = Field(..., ge=PORT_MIN, le=PORT_MAX)
+
 
 
 class SettingsSchema(BaseModel):
@@ -11,13 +92,14 @@ class SettingsSchema(BaseModel):
         description="Root directory of the {{package_module}} project.",
     )
     {{package_module | upper}}_OPTIONS: Path = Field(
-        default=Path(os.environ.get("{{package_module | upper}}_OPTIONS", "settings.toml")),
+        default=Path(os.environ.get("{{package_module | upper}}_OPTIONS", "{{package_module}}.toml")),
         description="Options file for the {{package_module}} project.",
     )
-    log_level: str = Field(default="INFO")
-    log_to_file: bool = Field(default=False)
-    log_file: str = Field(default="./log/{{package_module}}.log")
-    notebook_port: int = Field(..., ge=1024, le=49151)
+    logging: SettingsSchemaLogging
+    jupyter: SettingsSchemaJupyter
+    database: SettingsSchemaDatabase
+    master: SettingsSchemaMaster
+    agent: SettingsSchemaAgent
 
 def get_home_and_options() -> tuple[Path, Path]:
     """
@@ -25,34 +107,34 @@ def get_home_and_options() -> tuple[Path, Path]:
     """
     try:
         {{package_module | upper}}_HOME = Path(os.environ["{{package_module | upper}}_HOME"])
-    except KeyError:
+    except KeyError as ke:
         raise KeyError(
             "{{package_module | upper}}_HOME environment variable is not set. "
             "Please set it to the root directory of the {{package_module}} project."
-        )
+        ) from ke
 
     try:
         {{package_module | upper}}_OPTIONS = Path(os.environ["{{package_module | upper}}_OPTIONS"])
-    except KeyError:
+    except KeyError as ke:
         raise KeyError(
             "{{package_module | upper}}_OPTIONS environment variable is not set. "
             "Please set it to the options file for the {{package_module}} project."
-        )
+        ) from ke
     return {{package_module | upper}}_HOME, {{package_module | upper}}_OPTIONS
 
 
 @typechecked
 def read_settings() -> LazySettings:
     """
-    Read settings from settings.toml and .secrets.toml - without validating.
+    Read settings from {{package_module}}.toml and .secrets.toml - without validating.
     """
     {{package_module | upper}}_HOME, {{package_module | upper}}_OPTIONS = get_home_and_options()
     settings = Dynaconf(
         settings_files=[
             {{package_module | upper}}_HOME / {{package_module | upper}}_OPTIONS,
-            {{package_module | upper}}_HOME / ".secrets.toml",
-        ],  # Load from multiple files
-        environments=True,  # Enable environments
+            # {{package_module | upper}}_HOME / ".secrets.toml", #This dictionary merge doesn't work worth a sweet Goddamn
+        ],
+        environments=False,  # Enable environments
     )
     settings.{{package_module | upper}}_HOME = {{package_module | upper}}_HOME
     settings.{{package_module | upper}}_OPTIONS = {{package_module | upper}}_OPTIONS
@@ -61,33 +143,31 @@ def read_settings() -> LazySettings:
 
 
 @typechecked
-def validate_settings(settings_obj: LazySettings):
+def validate_settings(settings_dynaconf: LazySettings) -> SettingsSchema:
     """
-    Validate the entire settings object against the schema.
+    Validate the Dynaconf settings object against the schema.
+    Return the settings as a Pydantic object.
     """
-    # Use the pydantic model for schema validation
-    # settings_obj represents the current settings object.
-    # .dict() extracts all current settings as a dictionary for validation.
-    try:
-        # Convert settings to a dictionary and normalize keys to lowercase
-        # Note that if you don't do this, you'll get errors like:
-        #   database_url
-        #       Field required [type=missing, input_value={
-        # ...which is baffling b/c the field is clearly there.
-        normalized_settings = {k.lower(): v for k, v in settings_obj.to_dict().items()}
-        SettingsSchema.model_validate(normalized_settings)
-        # print("Settings validated successfully.")
-    except ValidationError as e:
-        # print("Settings validation failed!")
-        # print(e)
-        raise e
+    # Convert Dynaconf settings to a dictionary and normalize keys to lowercase
+    # Note that if you don't do this, you'll get errors like:
+    #   database_url
+    #       Field required [type=missing, input_value={
+    # ...which is baffling b/c the field is clearly there.
+    settings_dynaconf_normalized = {
+        k.lower(): v for k, v in settings_dynaconf.to_dict().items()
+    }
+    settings_pydantic = SettingsSchema.model_validate(settings_dynaconf_normalized)
+    return settings_pydantic
 
 
 @typechecked
-def load_settings() -> LazySettings:
+def load_settings() -> SettingsSchema:
     """
     Get the settings object and validate it before returning.
     """
-    s = read_settings()
-    validate_settings(s)
-    return s
+    settings_dynaconf = read_settings()
+    settings_pydantic = validate_settings(settings_dynaconf)
+    return settings_pydantic
+
+
+settings = load_settings()
