@@ -1,5 +1,5 @@
 OUTPUT_DIR = out
-OUTPUT_APP = try-prefect
+OUTPUT_APP = cactus-jack
 
 all:
 	echo "hi there, do something else"
