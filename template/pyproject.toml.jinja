@@ -1,5 +1,3 @@
-# ---- Project Info and Dependencies ----
-
 [project.urls]
 Repository = "https://github.com/{{ package_github_org }}/{{ package_name }}"
 # Homepage = "https://..."
@@ -42,8 +40,6 @@ dev = [
 {{ package_name }} = "{{ package_module }}.cmd.root:main"
 
 
-# ---- Build system ----
-
 # Dynamic versioning from:
 # https://github.com/ninoseki/uv-dynamic-versioning/
 
@@ -67,8 +63,6 @@ vcs = "git"
 style = "pep440"
 bump = true
 
-
-# ---- Settings ----
 
 [tool.ruff]
 # Set as desired, typically 88 (black standard) or 100 (wide).
@@ -166,7 +160,6 @@ testpaths =[
     "tests/",
 ]
 
-# ok wait, do I not actually need a separate .coveragerc anymore?  big if true ig
 [tool.coverage.run]
 omit = ["*/migrations/*", "*/legacy_code/*", "*/third_party/*"]
 
