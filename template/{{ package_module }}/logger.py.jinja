@@ -1,4 +1,5 @@
 import atexit as _atexit
+import logging
 import sys
 
 from loguru import logger as loguru_logger
@@ -9,6 +10,32 @@ LOGURU_LOG_LEVEL = settings.logging.log_level
 LOGURU_LOG_TO_FILE = settings.logging.log_to_file
 
 __all__ = ["logger"]
+
+# turn down watchfiles logging b/c otherwise, uvicorn in dev mode will infinitely detect logfile updates and write more logging and GOTO 10
+watchfiles_logger = logging.getLogger("watchfiles.main")
+watchfiles_logger.setLevel(logging.WARNING)
+
+
+# Step 1: Remove existing handlers and set up InterceptHandler
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+
+class InterceptHandler(logging.Handler):
+    def emit(self, record):
+        try:
+            level = logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+        frame, depth = logging.currentframe(), 2
+        while frame.f_back and frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+
+logging.basicConfig(handlers=[InterceptHandler()], level=LOGURU_LOG_LEVEL)
+
 
 LOGURU_LOG_FORMAT = (
     "<level>{level: <8}| </level>"
@@ -42,6 +69,25 @@ if LOGURU_LOG_TO_FILE:
         serialize=False,
         format="{time} | {level} | {name}:{function}:{line} - {message}",
     )
+
+# idk man
+# https://medium.com/@muh.bazm/how-i-unified-logging-in-fastapi-with-uvicorn-and-loguru-6813058c48fc
+
+loggers = (
+    "uvicorn",
+    "uvicorn.access",
+    "uvicorn.error",
+    "fastapi",
+    "asyncio",
+    "starlette",
+    "sqlalchemy.engine",
+)
+
+for logger_name in loggers:
+    logging_logger = logging.getLogger(logger_name)
+    logging_logger.handlers = []
+    logging_logger.propagate = True
+
 
 # Clean up the logger on exit
 _atexit.register(logger.remove)

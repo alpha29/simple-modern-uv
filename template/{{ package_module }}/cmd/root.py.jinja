@@ -3,6 +3,7 @@ import typer
 from {{package_module}} import __version__
 from {{package_module}}.cmd.nb import app as nb_app
 from {{package_module}}.cmd.box import app as box_app
+from {{package_module}}.cmd.api import app as api_app
 
 
 # typer autocompletion does weird crap to your shell, so turn it off
@@ -13,6 +14,9 @@ app.add_typer(
 )
 app.add_typer(
     box_app, name="box", help="Manage Docker box."
+)
+app.add_typer(
+    api_app, name="api", help="Manage REST API and server."
 )
 
 @app.command()

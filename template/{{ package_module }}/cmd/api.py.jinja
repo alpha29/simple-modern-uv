@@ -1,0 +1,65 @@
+from typing import Annotated
+
+import typer
+import uvicorn
+
+from {{package_module}}.settings import settings
+
+app = typer.Typer(add_completion=False, no_args_is_help=True)
+
+
+@app.command()
+def up(
+    prod: Annotated[bool, typer.Option(help="Run server in production mode.")] = False,
+):
+    """
+    Start {{package_module}} server.
+    """
+    typer.echo("Starting server...")
+    if prod:
+        uvicorn.run(
+            "{{package_module}}.api:app",
+            host="0.0.0.0",
+            port=settings.master.port,
+            log_config=None,
+            log_level=None,
+            reload=False,
+        )
+    else:
+        uvicorn.run(
+            "{{package_module}}.api:app",
+            host="0.0.0.0",
+            port=settings.master.port,
+            log_config=None,
+            log_level=None,
+            reload=True,
+            reload_excludes=["*.log", "**/log/**"],
+        )
+
+
+@app.command()
+def generate_api_spec(filename: str = "{{package_module}}_api.json"):
+    """
+    Generate {{package_name}} OpenAPI spec.
+    """
+    from pathlib import Path
+
+    filename = Path(filename)
+    typer.echo(f"Writing OpenAPI spec to {filename}...")
+    import json
+
+    import yaml
+
+    from {{package_module}}.api import app
+
+    openapi = app.openapi()
+    match filename.suffix:
+        case ".json":
+            with open(filename, "w") as f:
+                json.dump(openapi, f, indent=2)
+        case ".yaml" | ".yml":
+            with open(filename, "w") as f:
+                yaml.dump(openapi, f, sort_keys=False)
+        case _:
+            raise ValueError(f"'{filename.suffix}' not supported; please specify .json or .yaml.")
+    typer.echo("Done.")

@@ -15,6 +15,7 @@ dynamic = ["version"]
 
 dependencies = [
     "dynaconf>=3.2.10",
+    "fastapi[standard]>=0.136.1",
     "ipython>=9.0.1",
     "jupyter>=1.1.1",
     "loguru>=0.7.3",
@@ -31,7 +32,7 @@ dev = [
     "pytest>=9.0.3",
     "pytest-cov>=6.0.0",
     "ruff>=0.15.10",
-    "mypy>=1.15.0",
+    "ty>=0.0.38",
     "codespell>=2.4.1",
     "rich>=13.9.4",
 ]
@@ -108,14 +109,15 @@ ignore = [
 ]
 
 
-[tool.mypy]
-disable_error_code = [
-    "import-untyped",
-]
+[tool.ty.rules]
+unresolved-import = "ignore"
+
+[tool.ty.terminal]
+error-on-warning = true
 
 [tool.codespell]
-# ignore-words-list = "foo,bar"
-# skip = "foo.py,bar.py"
+ignore-words-list = "ND"
+skip = "*.pdb"
 
 [tool.pytest.ini_options]
 python_files = ["test*.py"]
@@ -163,7 +165,16 @@ testpaths =[
 [tool.coverage.run]
 omit = ["*/migrations/*", "*/legacy_code/*", "*/third_party/*"]
 
+[tool.uv]
+# Adding a dependency cooldown period to mitigate supply-chain attacks
+exclude-newer = "1 week"
+
 [[tool.uv.index]]
 name = "a29-pypi"
 url = "https://pypi.alpha29.com/simple/"
 publish-url = "https://pypi.alpha29.com/simple/"
+
+[[tool.uv.index]]
+name = "gcp-pypi"
+url = "https://us-central1-python.pkg.dev/alpha29-bfx/alpha29-pypi/"
+publish-url = "https://us-central1-python.pkg.dev/alpha29-bfx/alpha29-pypi/"

@@ -1,0 +1,71 @@
+import json
+import uuid
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+
+from {{package_module}}.settings import settings
+
+# TODO:  make this actually be a setting?
+# JOBS_DIR: Path = settings.{{package_module|upper}}_HOME / settings.jobs_dir
+JOBS_DIR: Path = settings.{{package_module|upper}}_HOME / "jobs"
+
+def init_jobs_dir() -> None:
+    JOBS_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def create_job(request_params: dict) -> str:
+    init_jobs_dir()
+    job_id = str(uuid.uuid4())
+    job_data = {
+        "job_id": job_id,
+        "status": "pending",
+        "created_at": datetime.now(UTC).isoformat(),
+        "completed_at": None,
+        "request": request_params,
+        "results": None,
+        "error": None,
+    }
+    _write_job(job_id, job_data)
+    return job_id
+
+
+def get_job(job_id: str) -> dict | None:
+    job_file = JOBS_DIR / f"{job_id}.json"
+    if not job_file.exists():
+        return None
+    return json.loads(job_file.read_text())
+
+
+def update_job(job_id: str, **kwargs) -> None:
+    job_data = get_job(job_id)
+    if job_data:
+        job_data.update(kwargs)
+        _write_job(job_id, job_data)
+
+
+def _write_job(job_id: str, data: dict) -> None:
+    job_file = JOBS_DIR / f"{job_id}.json"
+    job_file.write_text(json.dumps(data, indent=2))
+
+
+def cleanup_old_jobs(expiry_days: int | None = None) -> int:
+    if expiry_days is None:
+        expiry_days = settings.job_expiry_days
+    init_jobs_dir()
+    cutoff = datetime.now(UTC) - timedelta(days=expiry_days)
+    deleted = 0
+    for job_file in JOBS_DIR.glob("*.json"):
+        job_data = json.loads(job_file.read_text())
+        created = datetime.fromisoformat(job_data["created_at"])
+        if created < cutoff:
+            job_file.unlink()
+            deleted += 1
+    return deleted
+
+
+def delete_job(job_id: str) -> bool:
+    job_file = JOBS_DIR / f"{job_id}.json"
+    if job_file.exists():
+        job_file.unlink()
+        return True
+    return False

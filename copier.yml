@@ -21,6 +21,16 @@ _message_after_copy: |
     git branch -M main
     git push -u origin main
 
+    Or, better yet:
+
+    cd PROJECT
+    git init
+    # Make license or other initial adjustments if needed.
+    git add .
+    git commit -m "Initial commit."
+    gh repo create OWNER/PROJECT --source=. --remote=upstream --private
+    git push --set-upstream upstream master
+
 package_name:
     type: str
     help: What is the package name? (This will be the GitHub repo and PyPI package name, so use CamelCase, dash-case, or snake_case. This is the only required field.)

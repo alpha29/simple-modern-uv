@@ -2,6 +2,12 @@
 
 {{ package_description }}
 
+## Github Setup
+```shell
+gh repo create alpha29/{{ package_name }} --source=. --remote=upstream --private
+git push --set-upstream upstream master
+```
+
 ## Prerequisites
 
 `{{ package_name }}` uses `uv` for dependency and virtual-environment management.  So, make sure you have [installed uv system-wide](https://docs.astral.sh/uv/getting-started/installation/), e.g.:

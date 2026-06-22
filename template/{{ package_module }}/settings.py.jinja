@@ -81,7 +81,7 @@ class SettingsSchemaMaster(BaseModel):
     port: int = Field(..., ge=PORT_MIN, le=PORT_MAX)
 
 
-class SettingsSchemaAgent(BaseModel):
+class SettingsSchemaWorker(BaseModel):
     port: int = Field(..., ge=PORT_MIN, le=PORT_MAX)
 
 
@@ -99,7 +99,7 @@ class SettingsSchema(BaseModel):
     jupyter: SettingsSchemaJupyter
     database: SettingsSchemaDatabase
     master: SettingsSchemaMaster
-    agent: SettingsSchemaAgent
+    worker: SettingsSchemaWorker
 
 def get_home_and_options() -> tuple[Path, Path]:
     """
