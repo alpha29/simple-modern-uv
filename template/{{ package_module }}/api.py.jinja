@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -12,11 +13,19 @@ from {{package_module}}.job import (
 )
 
 from {{package_module}}.settings import settings
+from {{package_module}}.logger import logger
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("it's go time.  who wants some")
+    yield
+    logger.info("ok brother we're done here")
 
 app = FastAPI(
     title="{{package_name}} API",
     description="{{package_name}}",
     version="1.0.0",
+    lifespan=lifespan
 )
 
 @app.get("/")
